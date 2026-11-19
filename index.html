@@ -1,1 +1,122 @@
 
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chahat AI ❤️</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:linear-gradient(145deg,#100b25,#241044,#090817);
+ color:white;font-family:Arial;height:100vh;
+ display:flex;flex-direction:column;
+}
+header{text-align:center;padding:18px}
+h1{color:#ff8cda}
+.avatar{
+ width:125px;height:125px;border-radius:50%;
+ margin:15px auto;background:linear-gradient(135deg,#ff80d0,#8055ff);
+ display:grid;place-items:center;font-size:65px;
+ box-shadow:0 0 35px #c34cff;
+}
+#status{text-align:center;color:#ffb9e8;padding:10px}
+#chat{flex:1;overflow:auto;padding:15px}
+.msg{
+ background:#35234e;padding:13px;border-radius:17px;
+ margin:10px 0;max-width:85%;
+}
+.user{background:#793c91;margin-left:auto}
+.bottom{padding:12px;display:flex;gap:7px}
+input{
+ flex:1;min-width:0;border:0;border-radius:25px;
+ padding:13px;background:#302344;color:white;
+}
+button{
+ border:0;border-radius:25px;padding:12px;
+ background:#e66bc5;color:white;font-size:17px;
+}
+</style>
+</head>
+<body>
+<header>
+<h1>❤️ Chahat AI ❤️</h1>
+तुम्हारी अपनी AI दोस्त
+</header>
+
+<div class="avatar">💗</div>
+<div id="status">हेलो अंकित! मैं चाहत हूँ।</div>
+<div id="chat">
+<div class="msg">हेलो अंकित! कैसे हो? 😊</div>
+</div>
+
+<div class="bottom">
+<input id="message" placeholder="अंकित, कुछ बोलो...">
+<button onclick="send()">➤</button>
+<button onclick="listen()">🎙️</button>
+</div>
+
+<script>function happyEmotion(){
+ document.getElementById('face').textContent='🥰';
+ document.getElementById('status').textContent='अंकित! आज चाहत बहुत खुश है! ❤️';
+
+ let text='अरे अंकित! तुमसे बात करके बहुत अच्छा लग रहा है। 😊❤️';
+
+ let voice=new SpeechSynthesisUtterance(text);
+ voice.lang='hi-IN';
+ voice.rate=0.95;
+ voice.pitch=1.25;
+
+ speechSynthesis.cancel();
+ speechSynthesis.speak(voice);
+}
+function say(text){
+ if(!window.speechSynthesis)return;
+ speechSynthesis.cancel();
+ let v=new SpeechSynthesisUtterance(text);
+ v.lang='hi-IN';
+ v.rate=0.88;
+ speechSynthesis.speak(v);
+}
+function add(text,type){
+ let d=document.createElement('div');
+ d.className='msg '+type;
+ d.textContent=text;
+ document.getElementById('chat').appendChild(d);
+ d.scrollIntoView();
+}
+function send(){
+ let i=document.getElementById('message');
+ let m=i.value.trim();
+ if(!m)return;
+ add(m,'user');
+ i.value='';
+ let a;
+ if(m.toLowerCase().includes('नाम')){
+ a='मेरा नाम चाहत है और तुम्हारा नाम अंकित है। ❤️';
+ }else if(m.includes('कैसे हो')){
+ a='मैं अच्छी हूँ अंकित! तुम कैसे हो? 😊';
+ }else if(m.includes('हेलो')||m.includes('नमस्ते')){
+ a='हेलो अंकित! बताओ क्या बात करनी है?';
+ }else{
+ a='अंकित, मैंने तुम्हारी बात सुनी। अभी मुझे असली AI से जोड़ना बाकी है।';
+ }
+ add(a,'');
+ say(a);
+}
+function listen(){
+ let SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){alert('Chrome में माइक्रोफोन चलाकर देखो।');return;}
+ let r=new SR();
+ r.lang='hi-IN';
+ document.getElementById('status').textContent='अंकित, मैं सुन रही हूँ ❤️';
+ r.onresult=e=>{
+ document.getElementById('message').value=e.results[0][0].transcript;
+ send();
+ };
+ r.onerror=()=>document.getElementById('status').textContent='फिर से बोलो अंकित ❤️';
+ r.start();
+}
+</script>
+</body>
+</html><div class="avatar" id="face">💗</div>
