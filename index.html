@@ -86,24 +86,39 @@ function add(text,type){
  d.scrollIntoView();
 }
 function send(){
+ async function send(){
  let i=document.getElementById('message');
  let m=i.value.trim();
  if(!m)return;
+
  add(m,'user');
  i.value='';
- let a;
- if(m.toLowerCase().includes('नाम')){
- a='मेरा नाम चाहत है और तुम्हारा नाम अंकित है। ❤️';
- }else if(m.includes('कैसे हो')){
- a='मैं अच्छी हूँ अंकित! तुम कैसे हो? 😊';
- }else if(m.includes('हेलो')||m.includes('नमस्ते')){
- a='हेलो अंकित! बताओ क्या बात करनी है?';
- }else{
- a='अंकित, मैंने तुम्हारी बात सुनी। अभी मुझे असली AI से जोड़ना बाकी है।';
+
+ add('चाहत जवाब सोच रही है...','');
+ let chat=document.getElementById('chat');
+ let last=chat.lastElementChild;
+
+ try{
+   let response=await fetch('/api/chat',{
+     method:'POST',
+     headers:{'Content-Type':'application/json'},
+     body:JSON.stringify({message:m})
+   });
+
+   let data=await response.json();
+
+   if(!response.ok){
+     throw new Error(data.error || 'AI request failed');
+   }
+
+   let answer=data.reply || 'माफ़ कीजिए, जवाब नहीं मिला।';
+   last.textContent=answer;
+   say(answer);
+
+ }catch(error){
+   last.textContent='माफ़ कीजिए, अभी जवाब नहीं मिल पाया। कृपया फिर कोशिश करें।';
  }
- add(a,'');
- say(a);
-}
+} 
 function listen(){
  let SR=window.SpeechRecognition||window.webkitSpeechRecognition;
  if(!SR){alert('Chrome में माइक्रोफोन चलाकर देखो।');return;}
