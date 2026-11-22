@@ -15,9 +15,11 @@ module.exports = async (req, res) => {
       });
     }
 
-    if (!process.env.OPENAI_API_KEY) {
+    const apiKey = process.env.OPENAI_API_KEY;
+
+    if (!apiKey) {
       return res.status(500).json({
-        error: "API key is not configured"
+        error: "OPENAI_API_KEY is missing in Vercel"
       });
     }
 
@@ -27,7 +29,7 @@ module.exports = async (req, res) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+          "Authorization": `Bearer ${apiKey}`
         },
         body: JSON.stringify({
           model: "gpt-4.1-mini",
@@ -40,8 +42,12 @@ module.exports = async (req, res) => {
     const data = await response.json();
 
     if (!response.ok) {
-      return res.status(500).json({
-        error: "AI request failed"
+      console.error("OpenAI API error:", response.status, data);
+
+      return res.status(502).json({
+        error: data.error?.message ||
+          "OpenAI API request failed",
+        status: response.status
       });
     }
 
@@ -50,10 +56,13 @@ module.exports = async (req, res) => {
     });
 
   } catch (error) {
+    console.error("Chat API error:", error);
+
     return res.status(500).json({
       error: "Server error"
     });
   }
 };
+
 
 
