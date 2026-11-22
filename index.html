@@ -5,133 +5,271 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chahat AI ❤️</title>
+
 <style>
 *{box-sizing:border-box}
+
 body{
- margin:0;background:linear-gradient(145deg,#100b25,#241044,#090817);
- color:white;font-family:Arial;height:100vh;
- display:flex;flex-direction:column;
+ margin:0;
+ background:linear-gradient(145deg,#100b25,#241044,#090817);
+ color:white;
+ font-family:Arial,sans-serif;
+ height:100vh;
+ display:flex;
+ flex-direction:column;
 }
-header{text-align:center;padding:18px}
-h1{color:#ff8cda}
+
+header{
+ text-align:center;
+ padding:18px;
+ background:#160d2b;
+}
+
+h1{color:#ff8cda;margin:5px}
+
 .avatar{
- width:125px;height:125px;border-radius:50%;
- margin:15px auto;background:linear-gradient(135deg,#ff80d0,#8055ff);
- display:grid;place-items:center;font-size:65px;
+ width:110px;
+ height:110px;
+ border-radius:50%;
+ margin:18px auto 8px;
+ background:linear-gradient(135deg,#ff80d0,#8055ff);
+ display:grid;
+ place-items:center;
+ font-size:55px;
  box-shadow:0 0 35px #c34cff;
 }
-#status{text-align:center;color:#ffb9e8;padding:10px}
-#chat{flex:1;overflow:auto;padding:15px}
+
+#status{
+ text-align:center;
+ color:#ffb9e8;
+ padding:10px;
+ font-size:14px;
+}
+
+#chat{
+ flex:1;
+ overflow-y:auto;
+ padding:15px;
+}
+
 .msg{
- background:#35234e;padding:13px;border-radius:17px;
- margin:10px 0;max-width:85%;
+ background:#35234e;
+ padding:13px;
+ border-radius:17px;
+ margin:10px 0;
+ max-width:85%;
+ line-height:1.5;
+ overflow-wrap:anywhere;
 }
-.user{background:#793c91;margin-left:auto}
-.bottom{padding:12px;display:flex;gap:7px}
+
+.user{
+ background:#793c91;
+ margin-left:auto;
+}
+
+.bottom{
+ padding:12px;
+ display:flex;
+ gap:7px;
+ background:#160d2b;
+}
+
 input{
- flex:1;min-width:0;border:0;border-radius:25px;
- padding:13px;background:#302344;color:white;
+ flex:1;
+ min-width:0;
+ border:0;
+ border-radius:25px;
+ padding:13px;
+ background:#302344;
+ color:white;
+ font-size:15px;
 }
+
 button{
- border:0;border-radius:25px;padding:12px;
- background:#e66bc5;color:white;font-size:17px;
+ border:0;
+ border-radius:25px;
+ padding:12px 15px;
+ background:#e66bc5;
+ color:white;
+ font-size:17px;
 }
+
+button:disabled{opacity:.5}
+
+.voice{
+ display:block;
+ margin:8px auto;
+ background:#8055ff;
+}
+
 </style>
 </head>
+
 <body>
+
 <header>
 <h1>❤️ Chahat AI ❤️</h1>
-तुम्हारी अपनी AI दोस्त
+<div>तुम्हारी अपनी AI Assistant</div>
 </header>
 
-<div class="avatar">💗</div>
-<div id="status">हेलो अंकित! मैं चाहत हूँ।</div>
+<div class="avatar" id="face">💗</div>
+
+<div id="status">नमस्ते! मैं चाहत हूँ। 😊</div>
+
+<button class="voice" onclick="enableVoice()">
+🔊 आवाज़ चालू करो
+</button>
+
 <div id="chat">
-<div class="msg">हेलो अंकित! कैसे हो? 😊</div>
+<div class="msg">नमस्ते! मैं चाहत हूँ। मुझसे कुछ भी पूछो। ❤️</div>
 </div>
 
 <div class="bottom">
-<input id="message" placeholder="अंकित, कुछ बोलो...">
-<button onclick="send()">➤</button>
+<input id="message" placeholder="यहाँ लिखो या बोलो...">
+<button id="sendBtn" onclick="send()">➤</button>
 <button onclick="listen()">🎙️</button>
 </div>
 
-<script>function happyEmotion(){
- document.getElementById('face').textContent='🥰';
- document.getElementById('status').textContent='अंकित! आज चाहत बहुत खुश है! ❤️';
+<script>
 
- let text='अरे अंकित! तुमसे बात करके बहुत अच्छा लग रहा है। 😊❤️';
+let voiceEnabled=false;
+let busy=false;
 
- let voice=new SpeechSynthesisUtterance(text);
- voice.lang='hi-IN';
- voice.rate=0.95;
- voice.pitch=1.25;
-
- speechSynthesis.cancel();
- speechSynthesis.speak(voice);
-}
-function say(text){
- if(!window.speechSynthesis)return;
- speechSynthesis.cancel();
- let v=new SpeechSynthesisUtterance(text);
- v.lang='hi-IN';
- v.rate=0.88;
- speechSynthesis.speak(v);
-}
 function add(text,type){
- let d=document.createElement('div');
+ const d=document.createElement('div');
  d.className='msg '+type;
  d.textContent=text;
- document.getElementById('chat').appendChild(d);
- d.scrollIntoView();
+ const chat=document.getElementById('chat');
+ chat.appendChild(d);
+ chat.scrollTop=chat.scrollHeight;
+ return d;
 }
-function send(){
- async function send(){
- let i=document.getElementById('message');
- let m=i.value.trim();
- if(!m)return;
 
- add(m,'user');
- i.value='';
+function say(text){
+ if(!voiceEnabled || !window.speechSynthesis)return;
 
- add('चाहत जवाब सोच रही है...','');
- let chat=document.getElementById('chat');
- let last=chat.lastElementChild;
+ speechSynthesis.cancel();
+
+ const v=new SpeechSynthesisUtterance(text);
+ v.lang='hi-IN';
+ v.rate=0.9;
+ v.pitch=1;
+
+ speechSynthesis.speak(v);
+}
+
+function enableVoice(){
+ voiceEnabled=true;
+ document.getElementById('status').textContent=
+ 'चाहत की आवाज़ चालू है ❤️';
+
+ say('नमस्ते! मैं चाहत हूँ। अब मैं तुम्हें जवाब बोलकर सुनाऊँगी।');
+}
+
+async function send(){
+
+ if(busy)return;
+
+ const input=document.getElementById('message');
+ const message=input.value.trim();
+
+ if(!message)return;
+
+ busy=true;
+ document.getElementById('sendBtn').disabled=true;
+
+ add(message,'user');
+ input.value='';
+
+ const waiting=add('चाहत जवाब सोच रही है...','');
+ document.getElementById('status').textContent='जवाब तैयार हो रहा है...';
 
  try{
-   let response=await fetch('/api/chat',{
-     method:'POST',
-     headers:{'Content-Type':'application/json'},
-     body:JSON.stringify({message:m})
-   });
 
-   let data=await response.json();
+ const response=await fetch('/api/chat',{
+ method:'POST',
+ headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({message:message})
+ });
 
-   if(!response.ok){
-     throw new Error(data.error || 'AI request failed');
-   }
+ const data=await response.json();
 
-   let answer=data.reply || 'माफ़ कीजिए, जवाब नहीं मिला।';
-   last.textContent=answer;
-   say(answer);
+ if(!response.ok){
+ throw new Error(data.error || 'AI request failed');
+ }
+
+ const answer=data.reply || 'माफ़ करना, जवाब नहीं मिला।';
+
+ waiting.textContent=answer;
+ document.getElementById('status').textContent='चाहत तैयार है ❤️';
+ document.getElementById('face').textContent='🥰';
+
+ say(answer);
 
  }catch(error){
-   last.textContent='माफ़ कीजिए, अभी जवाब नहीं मिल पाया। कृपया फिर कोशिश करें।';
+
+ waiting.textContent=
+ 'अभी जवाब नहीं मिल पाया। इंटरनेट या API कनेक्शन जाँचें।';
+
+ document.getElementById('status').textContent='कनेक्शन में समस्या है।';
+
+ }finally{
+
+ busy=false;
+ document.getElementById('sendBtn').disabled=false;
+
  }
-} 
+
+}
+
 function listen(){
- let SR=window.SpeechRecognition||window.webkitSpeechRecognition;
- if(!SR){alert('Chrome में माइक्रोफोन चलाकर देखो।');return;}
- let r=new SR();
- r.lang='hi-IN';
- document.getElementById('status').textContent='अंकित, मैं सुन रही हूँ ❤️';
- r.onresult=e=>{
- document.getElementById('message').value=e.results[0][0].transcript;
+
+ const SR=window.SpeechRecognition ||
+ window.webkitSpeechRecognition;
+
+ if(!SR){
+ alert('आवाज़ पहचानने के लिए Chrome ब्राउज़र इस्तेमाल करें।');
+ return;
+ }
+
+ const recognition=new SR();
+
+ recognition.lang='hi-IN';
+ recognition.continuous=false;
+ recognition.interimResults=false;
+
+ document.getElementById('status').textContent=
+ 'चाहत सुन रही है... बोलो ❤️';
+
+ recognition.onresult=function(event){
+ document.getElementById('message').value=
+ event.results[0][0].transcript;
  send();
  };
- r.onerror=()=>document.getElementById('status').textContent='फिर से बोलो अंकित ❤️';
- r.start();
+
+ recognition.onerror=function(){
+ document.getElementById('status').textContent=
+ 'आवाज़ नहीं सुनाई दी। फिर कोशिश करो।';
+ };
+
+ recognition.onend=function(){
+ if(!busy){
+ document.getElementById('status').textContent=
+ 'चाहत तैयार है ❤️';
+ }
+ };
+
+ recognition.start();
+
 }
+
+document.getElementById('message').addEventListener(
+ 'keydown',function(event){
+ if(event.key==='Enter')send();
+ }
+);
+
 </script>
+
 </body>
-</html><div class="avatar" id="face">💗</div>
+</html>
