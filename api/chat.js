@@ -1,25 +1,42 @@
 
 
 
+
 module.exports = async (req, res) => {
+  console.log("CHAT API STARTED");
+
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({
+      error: "Method not allowed"
+    });
   }
 
   try {
     const message = req.body?.message;
 
+    console.log("MESSAGE RECEIVED:", typeof message);
+
     if (typeof message !== "string" || !message.trim()) {
-      return res.status(400).json({ error: "Message is required" });
+      console.error("MESSAGE MISSING");
+
+      return res.status(400).json({
+        error: "Message is required"
+      });
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
 
+    console.log("GEMINI KEY PRESENT:", Boolean(apiKey));
+
     if (!apiKey) {
+      console.error("GEMINI_API_KEY IS MISSING");
+
       return res.status(500).json({
         error: "GEMINI_API_KEY is missing"
       });
     }
+
+    console.log("SENDING REQUEST TO GEMINI");
 
     const response = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/interactions",
@@ -31,7 +48,9 @@ module.exports = async (req, res) => {
         },
         body: JSON.stringify({
           model: "gemini-3.5-flash-lite",
-          input: "तुम्हारा नाम Chahat AI है। तुम्हें अपना नाम ChatGPT नहीं बताना है। जब कोई तुम्हारा नाम पूछे, तो कहना: मेरा नाम Chahat AI है। मैं आपकी AI सहायक हूँ। हमेशा सरल हिंदी या Hinglish में जवाब देना। यूज़र का संदेश: " + message.trim().slice(0, 4000),
+          input:
+            "तुम्हारा नाम Chahat AI है। हमेशा सरल हिंदी या Hinglish में जवाब देना। यूज़र का संदेश: " +
+            message.trim().slice(0, 4000),
           generation_config: {
             max_output_tokens: 500,
             thinking_level: "low"
@@ -40,10 +59,12 @@ module.exports = async (req, res) => {
       }
     );
 
+    console.log("GEMINI STATUS:", response.status);
+
     const data = await response.json();
 
     if (!response.ok) {
-      console.error("Gemini API error:", response.status, data);
+      console.error("GEMINI API ERROR:", response.status, data);
 
       return res.status(502).json({
         error: data.error?.message || "Gemini API request failed",
@@ -63,7 +84,7 @@ module.exports = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Chat API error:", error);
+    console.error("CHAT API ERROR:", error);
 
     return res.status(500).json({
       error: "Server error"
