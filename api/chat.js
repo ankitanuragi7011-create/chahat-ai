@@ -1,19 +1,16 @@
 
 
+
 module.exports = async (req, res) => {
   if (req.method !== "POST") {
-    return res.status(405).json({
-      error: "Method not allowed"
-    });
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
     const message = req.body?.message;
 
     if (typeof message !== "string" || !message.trim()) {
-      return res.status(400).json({
-        error: "Message is required"
-      });
+      return res.status(400).json({ error: "Message is required" });
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
@@ -33,11 +30,11 @@ module.exports = async (req, res) => {
           "x-goog-api-key": apiKey
         },
         body: JSON.stringify({
-          model: "models/gemini-4-hydrogen",
+          model: "gemini-3.5-flash-lite",
           input: message.trim().slice(0, 4000),
           generation_config: {
             max_output_tokens: 500,
-            thinking_level: "high"
+            thinking_level: "low"
           }
         })
       }
