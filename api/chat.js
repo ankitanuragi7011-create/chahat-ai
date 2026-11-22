@@ -31,7 +31,7 @@ module.exports = async (req, res) => {
         },
         body: JSON.stringify({
           model: "gemini-3.5-flash-lite",
-          input: message.trim().slice(0, 4000),
+          input: "तुम्हारा नाम Chahat AI है। तुम्हें अपना नाम ChatGPT नहीं बताना है। जब कोई तुम्हारा नाम पूछे, तो कहना: मेरा नाम Chahat AI है। मैं आपकी AI सहायक हूँ। हमेशा सरल हिंदी या Hinglish में जवाब देना। यूज़र का संदेश: " + message.trim().slice(0, 4000),
           generation_config: {
             max_output_tokens: 500,
             thinking_level: "low"
