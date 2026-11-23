@@ -3,9 +3,8 @@
 
 
 
-module.exports = async (req, res) => {
-  console.log("CHAT API STARTED");
 
+module.exports = async (req, res) => {
   if (req.method !== "POST") {
     return res.status(405).json({
       error: "Method not allowed"
@@ -15,23 +14,24 @@ module.exports = async (req, res) => {
   try {
     const message = req.body?.message;
 
-    console.log("MESSAGE RECEIVED:", typeof message);
-
     if (typeof message !== "string" || !message.trim()) {
       return res.status(400).json({
         error: "Message is required"
       });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const msg = message.trim().toLowerCase();
 
-    if (!apiKey) {
-      return res.status(500).json({
-        error: "GEMINI_API_KEY is missing"
+    // Name feature
+    if (
+      /mera naam|my name|naam kya|name kya|what is my name|who am i/.test(msg)
+    ) {
+      return res.status(200).json({
+        reply: "Ankit ❤️ तुम्हारा नाम Ankit है।"
       });
     }
 
-    // India Date and Time
+    // India date and time
     const now = new Date();
 
     const date = new Intl.DateTimeFormat("hi-IN", {
@@ -43,35 +43,46 @@ module.exports = async (req, res) => {
       timeZone: "Asia/Kolkata",
       hour: "2-digit",
       minute: "2-digit",
-      second: "2-digit",
       hour12: true
     }).format(now);
 
+    if (/samay|time|kitne baje|वक्त/.test(msg)) {
+      return res.status(200).json({
+        reply: `Ankit ❤️ अभी भारत में ${time} बजे हैं।`
+      });
+    }
+
+    if (/tarikh|date|tareekh|तारीख/.test(msg)) {
+      return res.status(200).json({
+        reply: `Ankit ❤️ आज ${date} है।`
+      });
+    }
+
+    if (/kaun sa din|aaj ka din|which day|day today/.test(msg)) {
+      return res.status(200).json({
+        reply: `Ankit ❤️ आज ${date} है।`
+      });
+    }
+
+    // Gemini API
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+      return res.status(500).json({
+        error: "GEMINI_API_KEY is missing"
+      });
+    }
+
     const prompt = `
-तुम्हारा नाम Chahat AI है।
-
-तुम्हारे यूज़र का नाम Ankit है।
-
-जरूरी नियम:
-1. यूज़र को प्यार और सम्मान से Ankit बुलाओ।
-2. अपना नाम पूछने पर Chahat AI बताओ।
-3. यूज़र का नाम पूछने पर Ankit बताओ।
-4. हमेशा सरल हिंदी या Hinglish में जवाब दो।
-5. यूज़र जब तारीख पूछे तभी तारीख बताओ।
-6. यूज़र जब समय पूछे तभी समय बताओ।
-7. यूज़र जब दिन पूछे तभी आज का दिन बताओ।
-8. बिना पूछे तारीख और समय मत बताना।
-9. तारीख और समय के लिए नीचे दी गई भारत की जानकारी इस्तेमाल करो।
-
+तुम Chahat AI हो।
+यूज़र का नाम Ankit है।
+उसे प्यार से Ankit बुलाओ।
+सरल हिंदी या Hinglish में जवाब दो।
 आज की तारीख: ${date}
-भारत का वर्तमान समय: ${time}
-समय क्षेत्र: Asia/Kolkata
+भारत का समय: ${time}
 
-यूज़र का संदेश:
-${message.trim().slice(0, 4000)}
+यूज़र का संदेश: ${message.trim().slice(0, 4000)}
 `;
-
-    console.log("SENDING REQUEST TO GEMINI");
 
     const response = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/interactions",
@@ -92,16 +103,15 @@ ${message.trim().slice(0, 4000)}
       }
     );
 
-    console.log("GEMINI STATUS:", response.status);
-
     const data = await response.json();
 
     if (!response.ok) {
       console.error("GEMINI API ERROR:", response.status, data);
 
-      return res.status(502).json({
-        error: data.error?.message || "Gemini API request failed",
-        status: response.status
+      return res.status(200).json({
+        reply: response.status === 503
+          ? "Ankit ❤️ Gemini अभी व्यस्त है। थोड़ी देर बाद फिर कोशिश करना।"
+          : "Ankit ❤️ अभी जवाब नहीं मिल पाया। कृपया थोड़ी देर बाद कोशिश करो।"
       });
     }
 
@@ -113,7 +123,7 @@ ${message.trim().slice(0, 4000)}
       .join("");
 
     return res.status(200).json({
-      reply: reply || "Ankit, AI से जवाब नहीं मिला।"
+      reply: reply || "Ankit ❤️ अभी जवाब नहीं मिला।"
     });
 
   } catch (error) {
