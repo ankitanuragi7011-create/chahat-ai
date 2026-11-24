@@ -110,12 +110,16 @@ module.exports = async (req, res) => {
       });
     }
 
-    const reply = (data.steps || [])
-      .filter(step => step.type === "model_output")
-      .flatMap(step => step.content || [])
-      .filter(item => item.type === "text")
-      .map(item => item.text || "")
-      .join("");
+    
+const reply = (data.steps || [])
+  .filter(step => step.type === "model_output")
+  .flatMap(step => step.content || [])
+  .filter(item => item.type === "text")
+  .map(item => item.text || "")
+  .join("")
+  .replace(/\*/g, "")
+  .trim();
+
 
     return res.status(200).json({
       reply: reply || "Ankit ❤️ अभी जवाब नहीं मिला।"
