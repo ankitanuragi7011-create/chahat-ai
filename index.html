@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="hi">
 <head>
@@ -101,7 +102,6 @@ button:disabled{opacity:.5}
  margin:8px auto;
  background:#8055ff;
 }
-
 </style>
 </head>
 
@@ -139,9 +139,11 @@ function add(text,type){
  const d=document.createElement('div');
  d.className='msg '+type;
  d.textContent=text;
+
  const chat=document.getElementById('chat');
  chat.appendChild(d);
  chat.scrollTop=chat.scrollHeight;
+
  return d;
 }
 
@@ -160,6 +162,7 @@ function say(text){
 
 function enableVoice(){
  voiceEnabled=true;
+
  document.getElementById('status').textContent=
  'चाहत की आवाज़ चालू है ❤️';
 
@@ -182,13 +185,19 @@ async function send(){
  input.value='';
 
  const waiting=add('चाहत जवाब सोच रही है...','');
- document.getElementById('status').textContent='जवाब तैयार हो रहा है...';
+
+ document.getElementById('status').textContent=
+ 'जवाब तैयार हो रहा है...';
 
  try{
 
- const response=await fetch('/api/chat',{
+ const response=await fetch(
+ 'https://chahat-ai-steel.vercel.app/api/chat',
+ {
  method:'POST',
- headers:{'Content-Type':'application/json'},
+ headers:{
+ 'Content-Type':'application/json'
+ },
  body:JSON.stringify({message:message})
  });
 
@@ -201,17 +210,23 @@ async function send(){
  const answer=data.reply || 'माफ़ करना, जवाब नहीं मिला।';
 
  waiting.textContent=answer;
- document.getElementById('status').textContent='चाहत तैयार है ❤️';
+
+ document.getElementById('status').textContent=
+ 'चाहत तैयार है ❤️';
+
  document.getElementById('face').textContent='🥰';
 
  say(answer);
 
  }catch(error){
 
+ console.error('CHAT ERROR:',error);
+
  waiting.textContent=
  'अभी जवाब नहीं मिल पाया। इंटरनेट या API कनेक्शन जाँचें।';
 
- document.getElementById('status').textContent='कनेक्शन में समस्या है।';
+ document.getElementById('status').textContent=
+ 'कनेक्शन में समस्या है।';
 
  }finally{
 
@@ -242,21 +257,27 @@ function listen(){
  'चाहत सुन रही है... बोलो ❤️';
 
  recognition.onresult=function(event){
+
  document.getElementById('message').value=
  event.results[0][0].transcript;
+
  send();
  };
 
  recognition.onerror=function(){
+
  document.getElementById('status').textContent=
  'आवाज़ नहीं सुनाई दी। फिर कोशिश करो।';
+
  };
 
  recognition.onend=function(){
+
  if(!busy){
  document.getElementById('status').textContent=
  'चाहत तैयार है ❤️';
  }
+
  };
 
  recognition.start();
